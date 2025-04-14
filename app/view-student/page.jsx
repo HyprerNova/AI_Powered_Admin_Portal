@@ -11,7 +11,7 @@ export default async function ViewStudent() {
   }
 
   const students = await prisma.student.findMany({
-    orderBy: { id: "desc" }, // Latest first
+    orderBy: { id: "desc" },
   });
 
   return (
@@ -40,11 +40,13 @@ export default async function ViewStudent() {
                 <th className="border p-2">12th Marks</th>
                 <th className="border p-2">10th Marks PDF</th>
                 <th className="border p-2">12th Marks PDF</th>
+                <th className="border p-2">Photo</th>
                 <th className="border p-2">10th School</th>
                 <th className="border p-2">12th School</th>
                 <th className="border p-2">Admission Mode</th>
                 <th className="border p-2">Caste</th>
                 <th className="border p-2">Caste Certificate</th>
+                <th className="border p-2">Created At</th> {/* New column */}
               </tr>
             </thead>
             <tbody>
@@ -92,6 +94,20 @@ export default async function ViewStudent() {
                       "N/A"
                     )}
                   </td>
+                  <td className="border p-2">
+                    {student.photo ? (
+                      <a
+                        href={student.photo}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-500 hover:underline"
+                      >
+                        View Photo
+                      </a>
+                    ) : (
+                      "N/A"
+                    )}
+                  </td>
                   <td className="border p-2">{student.class10thSchoolName}</td>
                   <td className="border p-2">{student.class12thSchoolName}</td>
                   <td className="border p-2">{student.modeOfAdmission}</td>
@@ -110,6 +126,7 @@ export default async function ViewStudent() {
                       "N/A"
                     )}
                   </td>
+                  <td className="border p-2">{student.createdAt?.toISOString() || "N/A"}</td> {/* New column data */}
                 </tr>
               ))}
             </tbody>
