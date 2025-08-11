@@ -49,8 +49,10 @@ export async function POST(request) {
 async function saveFile(file) {
   const uploadsDir = path.join(process.cwd(), "public/uploads");
   await fs.mkdir(uploadsDir, { recursive: true });
-  const filePath = path.join(uploadsDir, `${Date.now()}_${file.name}`);
+  const timestamp = Date.now();
+  const fileName = `${timestamp}_${file.name}`;
+  const filePath = path.join(uploadsDir, fileName);
   const arrayBuffer = await file.arrayBuffer();
   await fs.writeFile(filePath, Buffer.from(arrayBuffer));
-  return `/uploads/${Date.now()}_${file.name}`;
+  return `/uploads/${fileName}`;
 }
