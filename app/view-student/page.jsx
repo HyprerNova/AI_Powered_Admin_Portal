@@ -629,7 +629,7 @@ export default function ViewStudentPage() {
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
+        <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
@@ -705,10 +705,10 @@ export default function ViewStudentPage() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky right-0 bg-gray-50 z-10">
                       Actions
                     </th>
-                  </tr>
-                </thead>
+              </tr>
+            </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {students.map((student) => (
+              {students.map((student) => (
                     <tr
                       key={student.id}
                       className="hover:bg-gray-50 transition-colors duration-150"
@@ -756,50 +756,50 @@ export default function ViewStudentPage() {
                         {student.class12thMarks}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {student.class10thMarksPdf ? (
-                          <a
-                            href={student.class10thMarksPdf}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                    {student.class10thMarksPdf ? (
+                      <a
+                        href={student.class10thMarksPdf}
+                        target="_blank"
+                        rel="noopener noreferrer"
                             className="text-blue-600 hover:text-blue-900 transition-colors duration-150"
-                          >
-                            View File
-                          </a>
-                        ) : (
-                          "N/A"
-                        )}
-                      </td>
+                      >
+                        View File
+                      </a>
+                    ) : (
+                      "N/A"
+                    )}
+                  </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {student.class12thMarksPdf ? (
-                          <a
-                            href={student.class12thMarksPdf}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                    {student.class12thMarksPdf ? (
+                      <a
+                        href={student.class12thMarksPdf}
+                        target="_blank"
+                        rel="noopener noreferrer"
                             className="text-blue-600 hover:text-blue-900 transition-colors duration-150"
-                          >
-                            View File
-                          </a>
-                        ) : (
-                          "N/A"
-                        )}
-                      </td>
+                      >
+                        View File
+                      </a>
+                    ) : (
+                      "N/A"
+                    )}
+                  </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {student.photo ? (
-                          <a
-                            href={student.photo}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                    {student.photo ? (
+                      <a
+                        href={student.photo}
+                        target="_blank"
+                        rel="noopener noreferrer"
                           >
                             <img
                               src={student.photo}
                               alt={`${student.name}'s photo`}
                               className="h-16 w-16 object-cover rounded-full border hover:opacity-80 transition"
                             />
-                          </a>
-                        ) : (
-                          "N/A"
-                        )}
-                      </td>
+                      </a>
+                    ) : (
+                      "N/A"
+                    )}
+                  </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {student.class10thSchoolName}
                       </td>
@@ -813,19 +813,19 @@ export default function ViewStudentPage() {
                         {student.caste}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {student.casteCertificate ? (
-                          <a
-                            href={student.casteCertificate}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                    {student.casteCertificate ? (
+                      <a
+                        href={student.casteCertificate}
+                        target="_blank"
+                        rel="noopener noreferrer"
                             className="text-blue-600 hover:text-blue-900 transition-colors duration-150"
-                          >
-                            View File
-                          </a>
-                        ) : (
-                          "N/A"
-                        )}
-                      </td>
+                      >
+                        View File
+                      </a>
+                    ) : (
+                      "N/A"
+                    )}
+                  </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {new Date(student.createdAt).toLocaleDateString() ||
                           "N/A"}
@@ -854,13 +854,13 @@ export default function ViewStudentPage() {
                           </button>
                         </div>
                       </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                </tr>
+              ))}
+            </tbody>
+          </table>
             </div>
-          </div>
-        )}
+        </div>
+      )}
       </div>
     </div>
   );
