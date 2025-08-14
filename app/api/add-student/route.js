@@ -1,18 +1,14 @@
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
+import { uploadToS3, generateFileName } from "../../../lib/s3";
 
 const prisma = new PrismaClient();
-const uploadDir = path.join(process.cwd(), "public/uploads");
 
 export async function POST(req) {
   try {
     const formData = await req.formData();
     const email = formData.get("email");
 
-    // ✨ **CHECK FOR EXISTING EMAIL**
-    // First, check if a student with the provided email already exists.
     const existingStudent = await prisma.student.findUnique({
       where: {
         email: email,
@@ -52,35 +48,57 @@ export async function POST(req) {
       photo: null,
     };
 
-    // Handle file uploads
-    await fs.mkdir(uploadDir, { recursive: true });
-
+    // Handle file uploads to S3
     const class10thPdf = formData.get("class10thMarksPdf");
     if (class10thPdf instanceof File) {
-      const filePath = path.join(uploadDir, `${Date.now()}_${class10thPdf.name}`);
-      await fs.writeFile(filePath, Buffer.from(await class10thPdf.arrayBuffer()));
-      data.class10thMarksPdf = `/uploads/${path.basename(filePath)}`;
+      const fileName = generateFileName(class10thPdf.name, "10th_marks_");
+      const fileBuffer = Buffer.from(await class10thPdf.arrayBuffer());
+      const uploadResult = await uploadToS3(fileBuffer, fileName, class10thPdf.type);
+      
+      if (uploadResult.success) {
+        data.class10thMarksPdf = uploadResult.url;
+      } else {
+        return NextResponse.json({ error: "Failed to upload 10th marks PDF" }, { status: 500 });
+      }
     }
 
     const class12thPdf = formData.get("class12thMarksPdf");
     if (class12thPdf instanceof File) {
-      const filePath = path.join(uploadDir, `${Date.now()}_${class12thPdf.name}`);
-      await fs.writeFile(filePath, Buffer.from(await class12thPdf.arrayBuffer()));
-      data.class12thMarksPdf = `/uploads/${path.basename(filePath)}`;
+      const fileName = generateFileName(class12thPdf.name, "12th_marks_");
+      const fileBuffer = Buffer.from(await class12thPdf.arrayBuffer());
+      const uploadResult = await uploadToS3(fileBuffer, fileName, class12thPdf.type);
+      
+      if (uploadResult.success) {
+        data.class12thMarksPdf = uploadResult.url;
+      } else {
+        return NextResponse.json({ error: "Failed to upload 12th marks PDF" }, { status: 500 });
+      }
     }
 
     const casteCert = formData.get("casteCertificate");
     if (casteCert instanceof File) {
-      const filePath = path.join(uploadDir, `${Date.now()}_${casteCert.name}`);
-      await fs.writeFile(filePath, Buffer.from(await casteCert.arrayBuffer()));
-      data.casteCertificate = `/uploads/${path.basename(filePath)}`;
+      const fileName = generateFileName(casteCert.name, "caste_cert_");
+      const fileBuffer = Buffer.from(await casteCert.arrayBuffer());
+      const uploadResult = await uploadToS3(fileBuffer, fileName, casteCert.type);
+      
+      if (uploadResult.success) {
+        data.casteCertificate = uploadResult.url;
+      } else {
+        return NextResponse.json({ error: "Failed to upload caste certificate" }, { status: 500 });
+      }
     }
 
     const photo = formData.get("photo");
     if (photo instanceof File) {
-      const filePath = path.join(uploadDir, `${Date.now()}_${photo.name}`);
-      await fs.writeFile(filePath, Buffer.from(await photo.arrayBuffer()));
-      data.photo = `/uploads/${path.basename(filePath)}`;
+      const fileName = generateFileName(photo.name, "photo_");
+      const fileBuffer = Buffer.from(await photo.arrayBuffer());
+      const uploadResult = await uploadToS3(fileBuffer, fileName, photo.type);
+      
+      if (uploadResult.success) {
+        data.photo = uploadResult.url;
+      } else {
+        return NextResponse.json({ error: "Failed to upload photo" }, { status: 500 });
+      }
     }
 
     // Create the new student record in the database
