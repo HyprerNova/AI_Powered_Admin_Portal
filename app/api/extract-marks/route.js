@@ -18,7 +18,10 @@ export async function POST(req) {
     const marksType = formData.get("marksType");
 
     if (!marksheet || !(marksheet instanceof File)) {
-      return NextResponse.json({ error: "No marksheet file uploaded." }, { status: 400 });
+      return NextResponse.json(
+        { error: "No marksheet file uploaded." },
+        { status: 400 },
+      );
     }
 
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -53,13 +56,18 @@ export async function POST(req) {
     const extractedMarks = parseFloat(response.text());
 
     if (isNaN(extractedMarks)) {
-      return NextResponse.json({ error: "Failed to extract a valid number from the marksheet." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Failed to extract a valid number from the marksheet." },
+        { status: 400 },
+      );
     }
 
     return NextResponse.json({ marks: extractedMarks });
-
   } catch (error) {
     console.error("Error extracting marks:", error);
-    return NextResponse.json({ error: "Failed to process the marksheet." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to process the marksheet." },
+      { status: 500 },
+    );
   }
 }

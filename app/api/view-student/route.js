@@ -1,5 +1,5 @@
-import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -11,6 +11,9 @@ export async function GET() {
     return NextResponse.json(students, { status: 200 });
   } catch (error) {
     console.error("View students error:", error);
-    return NextResponse.json({ error: "Failed to fetch students" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch students" },
+      { status: 500 },
+    );
   }
 }

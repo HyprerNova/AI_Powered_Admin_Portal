@@ -8,6 +8,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write .",
+    "pre-commit": "npm run lint:fix && npm run format:fix && git add .",
     "migrate-s3": "node scripts/migrate-to-s3.mjs",
     "test-s3": "node scripts/test-s3.mjs"
   },
@@ -19,9 +23,11 @@
     "@heroicons/react": "^2.2.0",
     "@prisma/client": "^6.6.0",
     "bcryptjs": "^3.0.2",
+    "dotenv": "^17.2.3",
     "formidable": "^3.5.4",
     "next": "15.3.0",
     "next-auth": "^4.24.11",
+    "pg": "^8.16.3",
     "prisma": "^6.6.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
@@ -31,6 +37,7 @@
     "@tailwindcss/postcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "15.3.0",
+    "prettier": "^3.4.0",
     "tailwindcss": "^4"
   }
 }

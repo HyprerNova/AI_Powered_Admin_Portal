@@ -13,7 +13,9 @@ export async function POST(req) {
 
     if (!query) {
       // If the query is empty, return all students
-      const students = await prisma.student.findMany({ orderBy: { id: "desc" } });
+      const students = await prisma.student.findMany({
+        orderBy: { id: "desc" },
+      });
       return NextResponse.json(students);
     }
 
@@ -56,12 +58,19 @@ export async function POST(req) {
 
     try {
       // Clean up the AI's response to ensure it's valid JSON
-      const jsonResponse = response.text().replace(/```json/g, "").replace(/```/g, "").trim();
+      const jsonResponse = response
+        .text()
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
       prismaFilter = JSON.parse(jsonResponse);
     } catch (e) {
       console.error("Failed to parse AI response into JSON:", e);
       // If parsing fails, return an error or an empty array
-      return NextResponse.json({ error: "Failed to process your query." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Failed to process your query." },
+        { status: 400 },
+      );
     }
 
     const students = await prisma.student.findMany({
@@ -70,9 +79,11 @@ export async function POST(req) {
     });
 
     return NextResponse.json(students);
-
   } catch (error) {
     console.error("Search error:", error);
-    return NextResponse.json({ error: "Failed to execute search" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to execute search" },
+      { status: 500 },
+    );
   }
 }
