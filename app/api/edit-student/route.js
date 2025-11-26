@@ -1,14 +1,12 @@
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { query } from "@/lib/pool"; // Import your custom query function
 import {
   uploadToS3,
   generateFileName,
   deleteFromS3,
   getFileKeyFromUrl,
 } from "../../../lib/s3";
-
-const prisma = new PrismaClient();
 
 export async function POST(request) {
   const session = await getServerSession();
@@ -21,9 +19,11 @@ export async function POST(request) {
     const id = formData.get("id");
 
     // Get current student data to check for existing files
-    const currentStudent = await prisma.student.findUnique({
-      where: { id: parseInt(id) },
-    });
+    const currentStudentResult = await query(
+      `SELECT "class10thmarkspdf", "class12thmarkspdf", "castecertificate", "photo" FROM student WHERE id = $1`,
+      [parseInt(id)],
+    );
+    const currentStudent = currentStudentResult.rows[0];
 
     const data = {
       name: formData.get("name"),
@@ -44,6 +44,20 @@ export async function POST(request) {
       modeOfAdmission: formData.get("modeOfAdmission"),
       caste: formData.get("caste"),
     };
+
+    const updateFields = [];
+    const updateParams = [];
+    let paramIndex = 1;
+
+    for (const key in data) {
+      // Convert camelCase to snake_case for database columns where necessary
+      const dbColumnName = key.replace(
+        /[A-Z]/g,
+        (letter) => `_${letter.toLowerCase()}`,
+      );
+      updateFields.push(`"${dbColumnName}" = $${paramIndex++}`);
+      updateParams.push(data[key]);
+    }
 
     // Handle file uploads to S3
     const class10thPdf = formData.get("class10thMarksPdf");
@@ -154,10 +168,10 @@ export async function POST(request) {
       }
     }
 
-    await prisma.student.update({
-      where: { id: parseInt(id) },
-      data,
-    });
+    await query(`UPDATE student SET ${updateFields.join(", ")} WHERE id = $1`, [
+      ...updateParams,
+      parseInt(id),
+    ]);
 
     return NextResponse.json(
       { message: "Student updated successfully" },

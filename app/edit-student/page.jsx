@@ -1,8 +1,6 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { query } from "@/lib/pool"; // Import your custom query function
 
 export default async function EditStudent({ searchParams }) {
   const session = await getServerSession();
@@ -16,9 +14,10 @@ export default async function EditStudent({ searchParams }) {
     redirect("/view-student");
   }
 
-  const student = await prisma.student.findUnique({
-    where: { id },
-  });
+  const studentResult = await query(`SELECT * FROM student WHERE id = $1`, [
+    id,
+  ]);
+  const student = studentResult.rows[0];
 
   if (!student) {
     redirect("/view-student");

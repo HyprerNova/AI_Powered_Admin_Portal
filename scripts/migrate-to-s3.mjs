@@ -5,28 +5,31 @@
  * Run this script after setting up your S3 bucket and environment variables
  */
 
-import { PrismaClient } from "@prisma/client";
 import { uploadToS3, generateFileName } from "../lib/s3.js";
+import { query } from "../lib/pool.js"; // Import the query function
 import fs from "fs/promises";
 import path from "path";
-
-const prisma = new PrismaClient();
 
 async function migrateFilesToS3() {
   try {
     console.log("🚀 Starting migration to S3...");
 
     // Get all students with local file paths
-    const students = await prisma.student.findMany({
-      where: {
-        OR: [
-          { class10thMarksPdf: { startsWith: "/uploads/" } },
-          { class12thMarksPdf: { startsWith: "/uploads/" } },
-          { casteCertificate: { startsWith: "/uploads/" } },
-          { photo: { startsWith: "/uploads/" } },
-        ],
-      },
-    });
+    const selectStudentsQuery = `
+      SELECT id, name, email, phonenumber, address, gender, fathername, mothername,
+             fatheremail, motheremail, fathernumber, mothernumber, class10thmarks,
+             class12thmarks, class10thmarkspdf, class12thmarkspdf, photo,
+             class10thschoolname, class12thschoolname, modeofadmission, caste,
+             castecertificate, createdat
+      FROM student
+      WHERE
+        class10thmarkspdf LIKE '/uploads/%' OR
+        class12thmarkspdf LIKE '/uploads/%' OR
+        castecertificate LIKE '/uploads/%' OR
+        photo LIKE '/uploads/%'
+    `;
+    const studentResult = await query(selectStudentsQuery);
+    const students = studentResult.rows;
 
     console.log(
       `📋 Found ${students.length} students with local files to migrate`,
@@ -174,10 +177,17 @@ async function migrateFilesToS3() {
 
       // Update student record if there are changes
       if (Object.keys(updates).length > 0) {
-        await prisma.student.update({
-          where: { id: student.id },
-          data: updates,
-        });
+        const setClauses = Object.keys(updates)
+          .map((key, index) => `"${key}" = $${index + 2}`)
+          .join(", ");
+        const updateParams = Object.values(updates);
+
+        const updateStudentQuery = `
+          UPDATE student
+          SET ${setClauses}
+          WHERE id = $1
+        `;
+        await query(updateStudentQuery, [student.id, ...updateParams]);
         console.log(`  💾 Student record updated in database`);
       }
     }
@@ -194,7 +204,7 @@ async function migrateFilesToS3() {
     console.error("❌ Migration failed:", error);
     process.exit(1);
   } finally {
-    await prisma.$disconnect();
+    // No prisma.$disconnect() needed after removing Prisma
   }
 }
 
