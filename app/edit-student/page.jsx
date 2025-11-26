@@ -164,7 +164,9 @@ export default async function EditStudent({ searchParams }) {
               />
             </div>
             <div>
-              <label className="block text-gray-700">Class 10th School Name</label>
+              <label className="block text-gray-700">
+                Class 10th School Name
+              </label>
               <input
                 type="text"
                 name="class10thSchoolName"
@@ -174,7 +176,9 @@ export default async function EditStudent({ searchParams }) {
               />
             </div>
             <div>
-              <label className="block text-gray-700">Class 12th School Name</label>
+              <label className="block text-gray-700">
+                Class 12th School Name
+              </label>
               <input
                 type="text"
                 name="class12thSchoolName"

@@ -19,10 +19,10 @@ export async function POST(req) {
     if (existingStudent) {
       return NextResponse.json(
         { error: "A student with this email already exists." },
-        { status: 409 } // 409 Conflict is an appropriate HTTP status code.
+        { status: 409 }, // 409 Conflict is an appropriate HTTP status code.
       );
     }
-    
+
     // If no existing student, proceed with data assembly and file uploads.
     const data = {
       name: formData.get("name"),
@@ -53,12 +53,19 @@ export async function POST(req) {
     if (class10thPdf instanceof File) {
       const fileName = generateFileName(class10thPdf.name, "10th_marks_");
       const fileBuffer = Buffer.from(await class10thPdf.arrayBuffer());
-      const uploadResult = await uploadToS3(fileBuffer, fileName, class10thPdf.type);
-      
+      const uploadResult = await uploadToS3(
+        fileBuffer,
+        fileName,
+        class10thPdf.type,
+      );
+
       if (uploadResult.success) {
         data.class10thMarksPdf = uploadResult.url;
       } else {
-        return NextResponse.json({ error: "Failed to upload 10th marks PDF" }, { status: 500 });
+        return NextResponse.json(
+          { error: "Failed to upload 10th marks PDF" },
+          { status: 500 },
+        );
       }
     }
 
@@ -66,12 +73,19 @@ export async function POST(req) {
     if (class12thPdf instanceof File) {
       const fileName = generateFileName(class12thPdf.name, "12th_marks_");
       const fileBuffer = Buffer.from(await class12thPdf.arrayBuffer());
-      const uploadResult = await uploadToS3(fileBuffer, fileName, class12thPdf.type);
-      
+      const uploadResult = await uploadToS3(
+        fileBuffer,
+        fileName,
+        class12thPdf.type,
+      );
+
       if (uploadResult.success) {
         data.class12thMarksPdf = uploadResult.url;
       } else {
-        return NextResponse.json({ error: "Failed to upload 12th marks PDF" }, { status: 500 });
+        return NextResponse.json(
+          { error: "Failed to upload 12th marks PDF" },
+          { status: 500 },
+        );
       }
     }
 
@@ -79,12 +93,19 @@ export async function POST(req) {
     if (casteCert instanceof File) {
       const fileName = generateFileName(casteCert.name, "caste_cert_");
       const fileBuffer = Buffer.from(await casteCert.arrayBuffer());
-      const uploadResult = await uploadToS3(fileBuffer, fileName, casteCert.type);
-      
+      const uploadResult = await uploadToS3(
+        fileBuffer,
+        fileName,
+        casteCert.type,
+      );
+
       if (uploadResult.success) {
         data.casteCertificate = uploadResult.url;
       } else {
-        return NextResponse.json({ error: "Failed to upload caste certificate" }, { status: 500 });
+        return NextResponse.json(
+          { error: "Failed to upload caste certificate" },
+          { status: 500 },
+        );
       }
     }
 
@@ -93,11 +114,14 @@ export async function POST(req) {
       const fileName = generateFileName(photo.name, "photo_");
       const fileBuffer = Buffer.from(await photo.arrayBuffer());
       const uploadResult = await uploadToS3(fileBuffer, fileName, photo.type);
-      
+
       if (uploadResult.success) {
         data.photo = uploadResult.url;
       } else {
-        return NextResponse.json({ error: "Failed to upload photo" }, { status: 500 });
+        return NextResponse.json(
+          { error: "Failed to upload photo" },
+          { status: 500 },
+        );
       }
     }
 
@@ -106,15 +130,24 @@ export async function POST(req) {
       data,
     });
 
-    return NextResponse.json({ message: "Student added successfully", student }, { status: 201 });
+    return NextResponse.json(
+      { message: "Student added successfully", student },
+      { status: 201 },
+    );
   } catch (error) {
     console.error("Add student error:", error);
-    
+
     // Add a fallback for Prisma's unique constraint violation error
-    if (error.code === 'P2002' && error.meta?.target?.includes('email')) {
-        return NextResponse.json({ error: "A student with this email already exists." }, { status: 409 });
+    if (error.code === "P2002" && error.meta?.target?.includes("email")) {
+      return NextResponse.json(
+        { error: "A student with this email already exists." },
+        { status: 409 },
+      );
     }
 
-    return NextResponse.json({ error: "Failed to add student" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to add student" },
+      { status: 500 },
+    );
   }
 }

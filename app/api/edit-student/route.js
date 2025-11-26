@@ -1,7 +1,12 @@
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import { uploadToS3, generateFileName, deleteFromS3, getFileKeyFromUrl } from "../../../lib/s3";
+import {
+  uploadToS3,
+  generateFileName,
+  deleteFromS3,
+  getFileKeyFromUrl,
+} from "../../../lib/s3";
 
 const prisma = new PrismaClient();
 
@@ -14,10 +19,10 @@ export async function POST(request) {
   try {
     const formData = await request.formData();
     const id = formData.get("id");
-    
+
     // Get current student data to check for existing files
     const currentStudent = await prisma.student.findUnique({
-      where: { id: parseInt(id) }
+      where: { id: parseInt(id) },
     });
 
     const data = {
@@ -50,15 +55,22 @@ export async function POST(request) {
           await deleteFromS3(oldFileKey);
         }
       }
-      
+
       const fileName = generateFileName(class10thPdf.name, "10th_marks_");
       const fileBuffer = Buffer.from(await class10thPdf.arrayBuffer());
-      const uploadResult = await uploadToS3(fileBuffer, fileName, class10thPdf.type);
-      
+      const uploadResult = await uploadToS3(
+        fileBuffer,
+        fileName,
+        class10thPdf.type,
+      );
+
       if (uploadResult.success) {
         data.class10thMarksPdf = uploadResult.url;
       } else {
-        return NextResponse.json({ error: "Failed to upload 10th marks PDF" }, { status: 500 });
+        return NextResponse.json(
+          { error: "Failed to upload 10th marks PDF" },
+          { status: 500 },
+        );
       }
     }
 
@@ -71,15 +83,22 @@ export async function POST(request) {
           await deleteFromS3(oldFileKey);
         }
       }
-      
+
       const fileName = generateFileName(class12thPdf.name, "12th_marks_");
       const fileBuffer = Buffer.from(await class12thPdf.arrayBuffer());
-      const uploadResult = await uploadToS3(fileBuffer, fileName, class12thPdf.type);
-      
+      const uploadResult = await uploadToS3(
+        fileBuffer,
+        fileName,
+        class12thPdf.type,
+      );
+
       if (uploadResult.success) {
         data.class12thMarksPdf = uploadResult.url;
       } else {
-        return NextResponse.json({ error: "Failed to upload 12th marks PDF" }, { status: 500 });
+        return NextResponse.json(
+          { error: "Failed to upload 12th marks PDF" },
+          { status: 500 },
+        );
       }
     }
 
@@ -92,15 +111,18 @@ export async function POST(request) {
           await deleteFromS3(oldFileKey);
         }
       }
-      
+
       const fileName = generateFileName(photo.name, "photo_");
       const fileBuffer = Buffer.from(await photo.arrayBuffer());
       const uploadResult = await uploadToS3(fileBuffer, fileName, photo.type);
-      
+
       if (uploadResult.success) {
         data.photo = uploadResult.url;
       } else {
-        return NextResponse.json({ error: "Failed to upload photo" }, { status: 500 });
+        return NextResponse.json(
+          { error: "Failed to upload photo" },
+          { status: 500 },
+        );
       }
     }
 
@@ -113,15 +135,22 @@ export async function POST(request) {
           await deleteFromS3(oldFileKey);
         }
       }
-      
+
       const fileName = generateFileName(casteCertificate.name, "caste_cert_");
       const fileBuffer = Buffer.from(await casteCertificate.arrayBuffer());
-      const uploadResult = await uploadToS3(fileBuffer, fileName, casteCertificate.type);
-      
+      const uploadResult = await uploadToS3(
+        fileBuffer,
+        fileName,
+        casteCertificate.type,
+      );
+
       if (uploadResult.success) {
         data.casteCertificate = uploadResult.url;
       } else {
-        return NextResponse.json({ error: "Failed to upload caste certificate" }, { status: 500 });
+        return NextResponse.json(
+          { error: "Failed to upload caste certificate" },
+          { status: 500 },
+        );
       }
     }
 
@@ -130,9 +159,15 @@ export async function POST(request) {
       data,
     });
 
-    return NextResponse.json({ message: "Student updated successfully" }, { status: 200 });
+    return NextResponse.json(
+      { message: "Student updated successfully" },
+      { status: 200 },
+    );
   } catch (error) {
     console.error("Edit student error:", error);
-    return NextResponse.json({ error: "Failed to update student" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to update student" },
+      { status: 500 },
+    );
   }
 }

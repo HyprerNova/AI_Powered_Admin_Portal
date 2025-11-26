@@ -20,7 +20,7 @@ export default withAuth(
     pages: {
       signIn: "/", // Redirect to login page if unauthorized
     },
-  }
+  },
 );
 
 export const config = {

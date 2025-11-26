@@ -16,7 +16,10 @@ export async function POST(request) {
     const id = url.searchParams.get("id");
 
     if (!id) {
-      return NextResponse.json({ error: "Student ID is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Student ID is required" },
+        { status: 400 },
+      );
     }
 
     // Get student data to delete associated files
@@ -46,9 +49,15 @@ export async function POST(request) {
       where: { id: parseInt(id) },
     });
 
-    return NextResponse.json({ message: "Student deleted successfully" }, { status: 200 });
+    return NextResponse.json(
+      { message: "Student deleted successfully" },
+      { status: 200 },
+    );
   } catch (error) {
     console.error("Delete student error:", error);
-    return NextResponse.json({ error: "Failed to delete student" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to delete student" },
+      { status: 500 },
+    );
   }
 }
