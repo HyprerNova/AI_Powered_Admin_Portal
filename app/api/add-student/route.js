@@ -2,29 +2,36 @@ import { NextResponse } from "next/server";
 import { uploadToS3, generateFileName } from "../../../lib/s3";
 import { query } from "@/lib/pool";
 
+// Helper function to safely check if an item from formData is a file
+// without referencing the global 'File' object directly, which causes the crash.
+const isFile = (item) => {
+  // A valid file object from formData should be an object and have a size property > 0
+  return item && typeof item === "object" && item.size > 0;
+};
+
 export async function POST(req) {
   try {
     const formData = await req.formData();
     const email = formData.get("email");
 
+    // 1. Check for existing student by email
     const existingResult = await query(
       "SELECT id FROM student WHERE email = $1",
       [email],
     );
     const existingStudent = existingResult.rows[0];
 
-    // If a student is found, return an error response immediately.
     if (existingStudent) {
       return NextResponse.json(
         { error: "A student with this email already exists." },
-        { status: 409 }, // 409 Conflict is an appropriate HTTP status code.
+        { status: 409 }, // 409 Conflict
       );
     }
 
-    // If no existing student, proceed with data assembly and file uploads.
+    // 2. Assemble non-file data
     const data = {
       name: formData.get("name"),
-      email: email, // Use the email variable
+      email: email,
       phoneNumber: formData.get("phoneNumber"),
       address: formData.get("address"),
       gender: formData.get("gender"),
@@ -34,6 +41,7 @@ export async function POST(req) {
       motherEmail: formData.get("motherEmail") || null,
       fatherNumber: formData.get("fatherNumber") || null,
       motherNumber: formData.get("motherNumber") || null,
+      // Parse float for marks
       class10thMarks: parseFloat(formData.get("class10thMarks")),
       class12thMarks: parseFloat(formData.get("class12thMarks")),
       class10thMarksPdf: null,
@@ -46,9 +54,11 @@ export async function POST(req) {
       photo: null,
     };
 
-    // Handle file uploads to S3
+    // 3. Handle file uploads to S3
+
+    // File 1: 10th Marks PDF
     const class10thPdf = formData.get("class10thMarksPdf");
-    if (class10thPdf instanceof File) {
+    if (isFile(class10thPdf)) {
       const fileName = generateFileName(class10thPdf.name, "10th_marks_");
       const fileBuffer = Buffer.from(await class10thPdf.arrayBuffer());
       const uploadResult = await uploadToS3(
@@ -56,7 +66,6 @@ export async function POST(req) {
         fileName,
         class10thPdf.type,
       );
-
       if (uploadResult.success) {
         data.class10thMarksPdf = uploadResult.url;
       } else {
@@ -67,8 +76,9 @@ export async function POST(req) {
       }
     }
 
+    // File 2: 12th Marks PDF
     const class12thPdf = formData.get("class12thMarksPdf");
-    if (class12thPdf instanceof File) {
+    if (isFile(class12thPdf)) {
       const fileName = generateFileName(class12thPdf.name, "12th_marks_");
       const fileBuffer = Buffer.from(await class12thPdf.arrayBuffer());
       const uploadResult = await uploadToS3(
@@ -76,7 +86,6 @@ export async function POST(req) {
         fileName,
         class12thPdf.type,
       );
-
       if (uploadResult.success) {
         data.class12thMarksPdf = uploadResult.url;
       } else {
@@ -87,8 +96,9 @@ export async function POST(req) {
       }
     }
 
+    // File 3: Caste Certificate
     const casteCert = formData.get("casteCertificate");
-    if (casteCert instanceof File) {
+    if (isFile(casteCert)) {
       const fileName = generateFileName(casteCert.name, "caste_cert_");
       const fileBuffer = Buffer.from(await casteCert.arrayBuffer());
       const uploadResult = await uploadToS3(
@@ -96,7 +106,6 @@ export async function POST(req) {
         fileName,
         casteCert.type,
       );
-
       if (uploadResult.success) {
         data.casteCertificate = uploadResult.url;
       } else {
@@ -107,8 +116,9 @@ export async function POST(req) {
       }
     }
 
+    // File 4: Photo
     const photo = formData.get("photo");
-    if (photo instanceof File) {
+    if (isFile(photo)) {
       const fileName = generateFileName(photo.name, "photo_");
       const fileBuffer = Buffer.from(await photo.arrayBuffer());
       const uploadResult = await uploadToS3(fileBuffer, fileName, photo.type);
@@ -123,34 +133,34 @@ export async function POST(req) {
       }
     }
 
-    // Create the new student record in the database (RDS)
+    // 4. Create the new student record in the database (RDS)
     const insertResult = await query(
       `INSERT INTO student (
-         name,
-         email,
-         phoneNumber,
-         address,
-         gender,
-         fatherName,
-         motherName,
-         fatherEmail,
-         motherEmail,
-         fatherNumber,
-         motherNumber,
-         class10thMarks,
-         class12thMarks,
-         class10thMarksPdf,
-         class12thMarksPdf,
-         class10thSchoolName,
-         class12thSchoolName,
-         modeOfAdmission,
-         photo
-       ) VALUES (
-         $1, $2, $3, $4, $5,
-         $6, $7, $8, $9, $10,
-         $11, $12, $13, $14, $15,
-         $16, $17, $18, $19
-       ) RETURNING *`,
+                name,
+                email,
+                phoneNumber,
+                address,
+                gender,
+                fatherName,
+                motherName,
+                fatherEmail,
+                motherEmail,
+                fatherNumber,
+                motherNumber,
+                class10thMarks,
+                class12thMarks,
+                class10thMarksPdf,
+                class12thMarksPdf,
+                class10thSchoolName,
+                class12thSchoolName,
+                modeOfAdmission,
+                photo
+            ) VALUES (
+                $1, $2, $3, $4, $5,
+                $6, $7, $8, $9, $10,
+                $11, $12, $13, $14, $15,
+                $16, $17, $18, $19
+            ) RETURNING *`,
       [
         data.name,
         data.email,
@@ -183,7 +193,7 @@ export async function POST(req) {
   } catch (error) {
     console.error("Add student error:", error);
 
-    // Handle duplicate email at DB level (unique constraint) if present
+    // Handle duplicate email at DB level (unique constraint)
     if (error.code === "23505") {
       return NextResponse.json(
         { error: "A student with this email already exists." },
@@ -191,6 +201,7 @@ export async function POST(req) {
       );
     }
 
+    // Return a 500 status for all other errors, which includes the File ReferenceError
     return NextResponse.json(
       { error: "Failed to add student" },
       { status: 500 },
