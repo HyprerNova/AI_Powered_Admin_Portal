@@ -1,16 +1,10 @@
 // /app/api/student/delete/route.js (or equivalent)
 
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { query } from "@/lib/pool"; // Import your custom pg query function
 import { deleteFromS3, getFileKeyFromUrl } from "../../../lib/s3";
 
 export async function POST(request) {
-  const session = await getServerSession();
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   try {
     const url = new URL(request.url);
     const id = url.searchParams.get("id");

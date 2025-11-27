@@ -13,8 +13,6 @@ export default function ViewStudentPage() {
 
   // Fetch initial data when the component mounts
   useEffect(() => {
-    // In a real app with NextAuth.js, you'd use the useSession hook here
-    // For now, we'll fetch the data directly.
     const fetchInitialData = async () => {
       setIsLoading(true);
       try {

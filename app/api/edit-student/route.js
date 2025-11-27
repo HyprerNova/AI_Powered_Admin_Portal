@@ -1,4 +1,3 @@
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { query } from "@/lib/pool"; // Import your custom query function
 import {
@@ -9,11 +8,6 @@ import {
 } from "../../../lib/s3";
 
 export async function POST(request) {
-  const session = await getServerSession();
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   try {
     const formData = await request.formData();
     const id = formData.get("id");

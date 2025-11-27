@@ -1,24 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { signOut } from "next-auth/react";
-import { useState } from "react";
 
 export default function DashboardHead() {
-  const [isConfirming, setIsConfirming] = useState(false);
-
-  const handleLogout = () => {
-    if (isConfirming) {
-      signOut({ callbackUrl: "/login" });
-    } else {
-      const confirmed = window.confirm("Are you sure you want to sign out?");
-      if (confirmed) {
-        setIsConfirming(true);
-        signOut({ callbackUrl: "/login" });
-      }
-    }
-  };
-
   return (
     <header className="bg-white border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -57,26 +41,6 @@ export default function DashboardHead() {
               View Student
             </Link>
           </div>
-          <button
-            onClick={handleLogout}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
-          >
-            <svg
-              className="w-4 h-4 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-              />
-            </svg>
-            Logout
-          </button>
         </div>
       </div>
     </header>

@@ -1,13 +1,7 @@
-import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { query } from "@/lib/pool"; // Import your custom query function
 
 export default async function EditStudent({ searchParams }) {
-  const session = await getServerSession();
-  if (!session) {
-    redirect("/login");
-  }
-
   const searchParamsObj = await searchParams;
   const id = searchParamsObj?.id ? parseInt(searchParamsObj.id) : null;
   if (!id) {
